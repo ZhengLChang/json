@@ -12,6 +12,8 @@ int main(void){
   
   /*String*/
   json_append_member(json, "123", value);
+  json_append_member(json, "123", json_mkstring(NULL));
+  json_append_member(json, "123", json_mknumber(1000000));
   /*String*/
   json_append_member(json, "zheng", json_mkstring("FanFan"));
   /*null*/

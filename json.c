@@ -513,7 +513,11 @@ static JsonNode *mkstring(char *s)
 
 JsonNode *json_mkstring(const char *s)
 {
-	return mkstring(json_strdup(s));
+  if(s == NULL){
+	  return mkstring(json_strdup(""));
+  }else{
+	  return mkstring(json_strdup(s));
+  }
 }
 
 JsonNode *json_mknumber(double n)
@@ -583,9 +587,12 @@ void json_prepend_element(JsonNode *array, JsonNode *element)
 
 void json_append_member(JsonNode *object, const char *key, JsonNode *value)
 {
+  JsonNode *json = NULL;
 	assert(object->tag == JSON_OBJECT);
 	assert(value->parent == NULL);
-	
+	if( (json = json_find_member(object, key)) != NULL){
+		json_remove_from_parent(json);
+  }
 	append_member(object, json_strdup(key), value);
 }
 
