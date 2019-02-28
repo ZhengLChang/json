@@ -8,18 +8,22 @@ int main(void){
   JsonNode *json = json_mkobject();
   JsonNode *value = json_mkstring("234");
   JsonNode *arr = NULL;
+  char *p_str = NULL;
 
   
   /*String*/
   json_append_member(json, "123", value);
+#if 1
   json_append_member(json, "123", json_mkstring(NULL));
   json_append_member(json, "123", json_mknumber(1000000));
+#endif
   /*String*/
   json_append_member(json, "zheng", json_mkstring("FanFan"));
   /*null*/
   json_append_member(json, "number", json_mknumber(1));
 
   /*array*/
+#if 1
   arr = json_mkarray();
   json_append_element(arr, json_mknumber(1));
   json_append_element(arr, json_mknumber(2));
@@ -28,8 +32,12 @@ int main(void){
   json_append_element(arr, json_mknumber(6));
 
   json_append_member(json, "arr", arr);
-
-  printf("%s\n", json_encode(json));
+#endif
+  printf("%s\n", (p_str = json_encode(json)));
+  if(p_str != NULL){
+    free(p_str);
+    p_str = NULL;
+  }
   json_delete(json);
   return 0;
 }
