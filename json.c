@@ -592,6 +592,7 @@ void json_append_member(JsonNode *object, const char *key, JsonNode *value)
 	assert(value->parent == NULL);
 	if( (json = json_find_member(object, key)) != NULL){
 		json_remove_from_parent(json);
+    json_delete(json);
   }
 	append_member(object, json_strdup(key), value);
 }
