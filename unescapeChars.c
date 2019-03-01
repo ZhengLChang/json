@@ -42,7 +42,7 @@ static cgiParseResultType cgiParseFormInput(char *data, int length);
 static void cgiFreeResources();
 int main(void){ 
   char *sp = NULL;
-  char cp[] = "PnPEnable=1&DHCPEnable=1&dhcpCustomOptionFor66=&provisioningServer=&userName=%26&password=&commonAESKey=&MACAESKey=&checkNewConfig=1&repeatedly=0&interval=1440&weekly=0&startHour=3&startMinute=0&stopHour=3&stopMinute=0&dayOfWeekly=1\%2C1\%2C0\%2C0\%2C0\%2C0\%2C1&sunday=1&monday=1&tuesday=0&wednesday=0&thursday=0&friday=0&saturday=1&user_set_auto";
+  char cp[] = "PnPEnable=1&DHCPEnable=1&dhcpCustomOptionFor66=&provisioningServer=&userName=%26&password=&commonAESKey=&MACAESKey=&checkNewConfig=1&repeatedly=0&interval=1440&weekly=0&startHour=3&startMinute=0&stopHour=3&stopMinute=0&dayOfWeekly=1%2C1%2C0%2C0%2C0%2C0%2C1&sunday=1&monday=1&tuesday=0&wednesday=0&thursday=0&friday=0&saturday=1&user_set_auto";
   cgiSetupConstants();
   cgiParseFormInput(cp, strlen(cp));
   if(cgiFormEntryFirst != NULL){
