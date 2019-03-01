@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-static int HexValue[256];
+
 static void SetupConstants();
 typedef enum {
   EscapeRest,
@@ -36,27 +36,27 @@ typedef struct FormEntryStruct {
   char *tfileName;
   struct FormEntryStruct *next;
 } FormEntry;
-static FormEntry *FormEntryFirst;
-UnescapeResultType UnescapeChars(char **sp, char *cp, int len);
-static ParseResultType ParseFormInput(char *data, int length);
-static void FreeResources();
-int cgigetinteger_simple(char *name, const int def);
-const char *cgigetstring_simple(char *name, const char *def);
+
+static UnescapeResultType UnescapeChars(char **sp, char *cp, int len);
+ParseResultType ParseFormInput(FormEntry **Entry, char *data, int length);
+void FreeResources(FormEntry **Entry);
+int cgigetinteger_simple(FormEntry *Entry, char *name, const int def);
+const char *cgigetstring_simple(FormEntry *Entry, char *name, const char *def);
 int main(void){ 
   char *sp = NULL;
   char cp[] = "PnPEnable=1&DHCPEnable=1&dhcpCustomOptionFor66=&provisioningServer=&userName=%26&password=&commonAESKey=&MACAESKey=&checkNewConfig=1&repeatedly=0&interval=1440&weekly=0&startHour=3&startMinute=0&stopHour=3&stopMinute=0&dayOfWeekly=1%2C1%2C0%2C0%2C0%2C0%2C1&sunday=1&monday=1&tuesday=0&wednesday=0&thursday=0&friday=0&saturday=1&user_set_auto";
-  SetupConstants();
-  ParseFormInput(cp, strlen(cp));
+  FormEntry *FormEntryFirst = NULL;
+  ParseFormInput(&FormEntryFirst, cp, strlen(cp));
   if(FormEntryFirst != NULL){
     struct FormEntryStruct *p = NULL;
     for(p = FormEntryFirst; p ; p = p->next){
       printf("%s = %s\n", p->attr, p->value);
     }
   }
-  printf("DHCPEnable = %d\n", cgigetinteger_simple("DHCPEnable", 0));
-  printf("userName = %s\n", cgigetstring_simple("userName", ""));
-  printf("dayOfWeekly = %s\n", cgigetstring_simple("dayOfWeekly", ""));
-  FreeResources();
+  printf("DHCPEnable = %d\n", cgigetinteger_simple(FormEntryFirst, "DHCPEnable", 0));
+  printf("userName = %s\n", cgigetstring_simple(FormEntryFirst, "userName", ""));
+  printf("dayOfWeekly = %s\n", cgigetstring_simple(FormEntryFirst, "dayOfWeekly", ""));
+  FreeResources(&FormEntryFirst);
 //  UnescapeChars(&sp, cp, strlen(cp));
 //  printf("%s\n", sp);
   return 0;
@@ -64,6 +64,7 @@ int main(void){
 
 UnescapeResultType UnescapeChars(char **sp, char *cp, int len) {
   char *s;
+  int HexValue[256];
   EscapeState escapeState = EscapeRest;
   int escapedValue = 0;
   int srcPos = 0;
@@ -72,6 +73,7 @@ UnescapeResultType UnescapeChars(char **sp, char *cp, int len) {
   if (!s) {
     return UnescapeMemory;
   }
+  SetupConstants(HexValue, sizeof(HexValue) / sizeof(int));
   while (srcPos < len) {
     int ch = cp[srcPos];
     switch (escapeState) {
@@ -100,9 +102,10 @@ UnescapeResultType UnescapeChars(char **sp, char *cp, int len) {
   *sp = s;
   return UnescapeSuccess;
 }
-static void SetupConstants() {
+static void SetupConstants(int *HexValue, int len) {
   int i;
-  for (i=0; (i < 256); i++) {
+  if(len < 256) abort();
+  for (i=0; i < 256; i++) {
     HexValue[i] = 0;
   }
   HexValue['0'] = 0; 
@@ -130,7 +133,7 @@ static void SetupConstants() {
   return;
 }
 
-static ParseResultType ParseFormInput(char *data, int length) {
+ParseResultType ParseFormInput(FormEntry **Entry, char *data, int length) {
 	/* Scan for pairs, unescaping and storing them as they are found. */
 	int pos = 0;
 	FormEntry *n;
@@ -215,7 +218,7 @@ static ParseResultType ParseFormInput(char *data, int length) {
 		n->tfileName[0] = '\0';
 		n->next = 0;
 		if (!l) {
-			FormEntryFirst = n;
+			*Entry = n;
 		} else {
 			l->next = n;
 		}
@@ -227,10 +230,15 @@ static ParseResultType ParseFormInput(char *data, int length) {
 	return ParseSuccess;
 }
 
-static void FreeResources() {
-    FormEntry *c = FormEntryFirst;
+void FreeResources(FormEntry **Entry) {
+    FormEntry *c = NULL;
     FormEntry *n;
-    while (c) {
+
+    if(Entry == NULL || *Entry == NULL)
+    	return;
+
+
+    for (c = *Entry; c ;) {
       n = c->next;
       free(c->attr);
       free(c->value);
@@ -243,21 +251,21 @@ static void FreeResources() {
       free(c);
       c = n;
     }
-    FormEntryFirst = NULL;
+    *Entry = NULL;
     return;
 }
-int cgigetinteger_simple(char *name, const int def){
+int cgigetinteger_simple(FormEntry *Entry, char *name, const int def){
 	FormEntry *next = NULL;
-	for(next = FormEntryFirst; next; next = next->next){
+	for(next = Entry; next; next = next->next){
 		if(strcmp(next->attr, name) == 0){
 			return atoi(next->value);
 		}
 	}
     return def;
 }
-const char *cgigetstring_simple(char *name, const char *def){
+const char *cgigetstring_simple(FormEntry *Entry, char *name, const char *def){
 	FormEntry *next = NULL;
-	for(next = FormEntryFirst; next; next = next->next){
+	for(next = Entry; next; next = next->next){
 		if(strcmp(next->attr, name) == 0){
 			return next->value;
 		}
