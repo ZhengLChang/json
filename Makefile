@@ -18,6 +18,7 @@ springcleaning+=$(OutPut)
 all: $(OutPut)
 $(OutPut):${target}
 	$(CC) ${target}  -o $@ ${CFLAGS} ${INCLUDE} 
+	$(CC) unescapeChars.c -o unescapeChars ${CFLAGS}
 	
 clean:
 	-@rm  ${springcleaning} ${OutPut}
