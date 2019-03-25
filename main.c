@@ -8,6 +8,7 @@ int main(void){
   JsonNode *json = json_mkobject();
   JsonNode *value = json_mkstring("234");
   JsonNode *arr = NULL;
+  JsonNode *dataJson = json_mkobject();
   char *p_str = NULL;
 
   
@@ -33,7 +34,11 @@ int main(void){
 
   json_append_member(json, "arr", arr);
 #endif
-  printf("%s\n", (p_str = json_encode(json)));
+  /*include object*/
+  json_append_member(dataJson, "mac", json_mknumber(110));
+  json_append_member(json, "data", dataJson);
+
+  printf("%s", (p_str = json_encode(json)));
   if(p_str != NULL){
     free(p_str);
     p_str = NULL;

@@ -15,11 +15,13 @@ springcleaning+=$(OutPut)
 
 .PHONY: all clean
 
-all: $(OutPut) formParser
+all: $(OutPut) formParser jsonParser
 $(OutPut):${target}
 	$(CC) ${target}  -o $@ ${CFLAGS} ${INCLUDE} 
 formParser: formParser.o
 	$(CC) formParser.c -o formParser ${CFLAGS}
+jsonParser: jsonParser.o
+	$(CC) json.c jsonParser.c -o jsonParser ${CFLAGS} ${INCLUDE}
 	
 clean:
 	-@rm  ${springcleaning} ${OutPut}
